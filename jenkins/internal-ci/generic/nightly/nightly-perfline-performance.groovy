@@ -79,6 +79,7 @@ pipeline {
                 script {
                     def cortxCluster = build job: '/Motr/cortx-perfline/', wait: true,
                     parameters: [
+                        string(name: 'SOLUTION_CONFIG_TYPE', value: "manual"),
                         string(name: 'SEAGATE_TOOLS_BRANCH', value: "${SEAGATE_TOOLS_BRANCH}"),
                         string(name: 'SEAGATE_TOOLS_REPO', value: "${SEAGATE_TOOLS_REPO}"),
                         string(name: 'CORTX_RE_BRANCH', value: "${CORTX_RE_BRANCH}"),

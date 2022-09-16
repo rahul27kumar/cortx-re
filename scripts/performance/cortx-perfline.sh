@@ -58,7 +58,7 @@ function check_params() {
     if [ -z "$CORTX_DATA_IMAGE" ]; then echo "CORTX_DATA_IMAGE not provided. Using default : ghcr.io/seagate/cortx-data:2.0.0-latest"; CORTX_DATA_IMAGE=ghcr.io/seagate/cortx-data:2.0.0-latest; fi
     if [ -z "$CORTX_CONTROL_IMAGE" ]; then echo "CORTX_CONTROL_IMAGE not provided. Using default : ghcr.io/seagate/cortx-control:2.0.0-latest"; CORTX_CONTROL_IMAGE=ghcr.io/seagate/cortx-control:2.0.0-latest; fi
     if [ -z "$DEPLOYMENT_METHOD" ]; then echo "DEPLOYMENT_METHOD not provided. Using default : standard"; DEPLOYMENT_METHOD=standard; fi
-    if [ -z "$SOLUTION_CONFIG_TYPE" ]; then echo "SOLUTION_CONFIG_TYPE not provided. Using default : manual"; SOLUTION_CONFIG_TYPE=manual; fi
+    if [ -z "$SOLUTION_CONFIG_TYPE" ]; then echo "SOLUTION_CONFIG_TYPE not provided. Using default : automated"; SOLUTION_CONFIG_TYPE=automated; fi
     if [ -z "$SNS_CONFIG" ]; then SNS_CONFIG="1+0+0"; fi
     if [ -z "$DIX_CONFIG" ]; then DIX_CONFIG="1+0+0"; fi
     if [ -z "$EXTERNAL_EXPOSURE_SERVICE" ]; then EXTERNAL_EXPOSURE_SERVICE="NodePort"; fi
@@ -111,9 +111,11 @@ function pdsh_worker_exec() {
 
 function setup_cluster() {
     add_primary_separator "\t Installation of PerfLine setup on CORTX Cluster"
+    scp -q "$PRIMARY_NODE":/root/deploy-scripts/k8_cortx_cloud/solution.yaml .
+    ls -lrt "$(pwd)/solution.yaml"
     add_secondary_separator "Using $SOLUTION_CONFIG_TYPE type for generating solution.yaml"
 
-    if [ "$SOLUTION_CONFIG_TYPE" == manual ]; then
+    if [ "$SOLUTION_CONFIG_TYPE" == "manual" ]; then
         SOLUTION_CONFIG="$PWD/solution.yaml"
         if [ ! -f "$SOLUTION_CONFIG" ]; then echo -e "ERROR:$SOLUTION_CONFIG file is not available..."; exit 1; fi
     fi
@@ -170,13 +172,8 @@ function setup_cluster() {
 }
 
 function perfline-workloads() {
-    if [ "$SOLUTION_CONFIG_TYPE" == manual ]; then
-        SOLUTION_CONFIG="$PWD/solution.yaml"
-        if [ -f '$SOLUTION_CONFIG' ]; then echo "file $SOLUTION_CONFIG not available..."; exit 1; fi
-    fi
-    add_primary_separator "Trigger perfline workloads"
-    add_secondary_separator "http://$PRIMARY_NODE:8005/#!/results"
 
+    add_primary_separator "Trigger perfline workloads"
     ssh_primary_node "
     export WORKLOADS_DIR=$PERFLINE_WORKLOADS_DIR &&
     /var/tmp/install-perfline.sh --run-workloads"

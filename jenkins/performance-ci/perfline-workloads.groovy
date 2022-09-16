@@ -42,6 +42,11 @@ pipeline {
             choices: ['NodePort', 'LoadBalancer'],
             description: 'K8s Service to be used to expose RGW Service to outside cluster.'
         )
+        choice(
+            name: 'SOLUTION_CONFIG_TYPE',
+            choices: ['automated', 'manual'],
+            description: 'solution.yaml for CORTX deployment.'
+        )
         string(name: 'PERFLINE_WORKLOADS_DIR', defaultValue: "/root/perfline/wrapper/workload/jenkins/mini_workload", description: 'specify the location of your workload directory', trim: true)
         string(name: 'SYSTEM_DRIVE', defaultValue: '/dev/sdb', description: 'Provide appropriate system drive for HW and VM LC cluster', trim: true)
     }
@@ -96,7 +101,7 @@ pipeline {
                            echo "Exiting Jenkins job."
                            exit 1
                         fi
-                        export SOLUTION_CONFIG_TYPE=automated
+                        export SOLUTION_CONFIG_TYPE=${SOLUTION_CONFIG_TYPE}
                         export SEAGATE_TOOLS_BRANCH=${SEAGATE_TOOLS_BRANCH}
                         export SEAGATE_TOOLS_REPO=${SEAGATE_TOOLS_REPO}
                         export CORTX_SCRIPTS_BRANCH=${CORTX_SCRIPTS_BRANCH}
